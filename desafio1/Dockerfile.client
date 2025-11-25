@@ -1,0 +1,14 @@
+# Imagem base simples com curl
+FROM alpine/curl:latest
+
+# Define o diretório de trabalho
+WORKDIR /app
+
+# Copia o script do cliente
+COPY client.sh .
+
+# Dá permissão de execução
+RUN chmod +x client.sh
+
+# Comando para rodar o script (loop)
+CMD ["./client.sh"]
