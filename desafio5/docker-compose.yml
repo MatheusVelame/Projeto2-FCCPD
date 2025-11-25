@@ -1,0 +1,33 @@
+version: '3.8'
+
+services:
+  # Microserviço 1: Users
+  users-service:
+    build: ./users_service
+    container_name: users-service
+    networks:
+      - microservice-net
+
+  # Microserviço 2: Orders
+  orders-service:
+    build: ./orders_service
+    container_name: orders-service
+    networks:
+      - microservice-net
+
+  # API Gateway (Ponto único de entrada)
+  gateway:
+    build: ./gateway
+    container_name: api-gateway
+    ports:
+      - "8000:5000"  
+    depends_on:
+      - users-service
+      - orders-service
+    networks:
+      - microservice-net
+
+# Rede interna para comunicação entre os serviços
+networks:
+  microservice-net:
+    driver: bridge
