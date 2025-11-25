@@ -1,0 +1,41 @@
+version: '3.8'
+
+services:
+  web:
+    build: ./web
+    ports:
+      - "80:80" 
+    environment:
+      POSTGRES_DB: desafio_db
+      POSTGRES_USER: user_app
+      POSTGRES_PASSWORD: app_secret
+    depends_on:
+      - db
+      - cache
+    networks:
+      - rede-desafio3
+
+  db:
+    image: postgres:16-alpine
+    restart: always
+    environment:
+      POSTGRES_DB: desafio_db
+      POSTGRES_USER: user_app
+      POSTGRES_PASSWORD: app_secret
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    networks:
+      - rede-desafio3
+
+  cache:
+    image: redis:latest
+    restart: always
+    networks:
+      - rede-desafio3
+
+networks:
+  rede-desafio3:
+    driver: bridge
+
+volumes:
+  db-data:
