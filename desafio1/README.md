@@ -28,7 +28,7 @@ desafio1/
 ├── requirements.txt         # Dependências do Flask
 ├── run.sh                   # Script principal de build e execução
 └── server.py                # Servidor Flask na porta 8080
-
+```
 
 ## ⚙️ Instruções de Execução Passo a Passo
 
@@ -44,3 +44,4 @@ O script `run.sh` automatiza toda a execução.
 cd desafio1
 chmod +x run.sh
 ./run.sh
+```
