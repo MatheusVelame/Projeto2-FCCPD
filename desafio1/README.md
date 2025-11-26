@@ -30,18 +30,73 @@ desafio1/
 └── server.py                # Servidor Flask na porta 8080
 ```
 
-## ⚙️ Instruções de Execução Passo a Passo
+### ⚙️ Instruções de Execução Passo a Passo
 
-O script `run.sh` automatiza toda a execução.
+#### Pré-requisitos
+Certifique-se de ter o **Docker Engine** instalado e em execução.
 
-### 1. Pré-requisitos
+---
 
-- Docker Engine instalado.
+### Opção A: Linux / macOS (Usando Script Bash)
 
-### 2. Execução
+O script `run.sh` automatiza todas as etapas de inicialização e limpeza.
+
+1.  Navegue até o diretório do desafio:
+    ```bash
+    cd desafio1
+    ```
+
+2.  Dê permissão e execute o script de inicialização:
+    ```bash
+    chmod +x run.sh
+    ./run.sh
+    ```
+
+---
+
+### Opção B: Windows / PowerShell (Comandos Manuais)
+
+Para usuários de Windows, siga os comandos manualmente no terminal (PowerShell ou CMD):
+
+1.  **Limpeza e Criação da Rede:**
+    Remova containers e rede antigos (se existirem) e crie a rede customizada:
+    ```bash
+    # Limpa containers antigos
+    docker rm -f servidor cliente
+    # Limpa rede antiga
+    docker network rm rede_desafio1
+    # Cria a rede customizada (Requisito)
+    docker network create rede_desafio1
+    ```
+
+2.  **Construção das Imagens:**
+    ```bash
+    docker build -t server-image -f Dockerfile.server .
+    docker build -t client-image -f Dockerfile.client .
+    ```
+
+3.  **Execução dos Containers:**
+    Inicie o servidor (mapeando a porta 8080) e o cliente (conectados à rede):
+    ```bash
+    docker run -d --name servidor --network rede_desafio1 -p 8080:8080 server-image
+    docker run -d --name cliente --network rede_desafio1 client-image
+    ```
+
+---
+
+#### Demonstração e Comprovação (Logs)
+
+Para demonstrar a comunicação e a troca de mensagens, observe os logs dos containers:
+
+| Ação | Comando | Propósito |
+| :--- | :--- | :--- |
+| **Verificar o lado Cliente** | `docker logs -f cliente` | Mostrará o resultado de cada requisição `curl` a cada 5 segundos, comprovando a comunicação funcional. |
+| **Verificar o lado Servidor** | `docker logs -f servidor` | Mostrará os logs HTTP do Flask, indicando o recebimento periódico das requisições do container `cliente`. |
+
+#### Limpeza
+
+Para interromper e remover todos os recursos criados:
 
 ```bash
-cd desafio1
-chmod +x run.sh
-./run.sh
-```
+docker rm -f servidor cliente
+docker network rm rede_desafio1

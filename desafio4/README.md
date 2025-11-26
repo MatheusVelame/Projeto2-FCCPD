@@ -60,78 +60,82 @@ desafio4/
 
 ---
 
-## ⚙️ Instruções de Execução Passo a Passo
+### ⚙️ Instruções de Execução Passo a Passo
 
-O script `run_desafio4.sh` automatiza todo o processo.
-
-### 1. Pré-requisitos
-
-- Docker Engine instalado e rodando
-
-### 2. Execução
-
-1. Entre no diretório:
-   ```bash
-   cd desafio4
-   ```
-
-2. Dê permissão e execute o script:
-   ```bash
-   chmod +x run_desafio4.sh
-   ./run_desafio4.sh
-   ```
-
-O script irá:
-
-- Remover containers e redes antigas  
-- Criar a rede **`rede_microservicos4`**  
-- Construir as imagens dos dois microsserviços  
-- Subir os containers:  
-  - `users` (porta externa 5000)  
-  - `consumer` (porta externa 8001)
+#### Pré-requisitos
+Certifique-se de que o **Docker Engine** está instalado e em execução.
 
 ---
 
-## 🧪 Demonstração e Comprovação
+### Opção A: Linux / macOS (Usando Script Bash)
 
-### 1. Testar o Microserviço B (Consumer)
+O script `run_desafio4.sh` automatiza todo o processo de inicialização.
 
-Acesse:
+1.  Navegue até o diretório do desafio:
+    ```bash
+    cd desafio4
+    ```
 
-```bash
-curl http://localhost:8001
-# ou abra http://localhost:8001 no navegador
-```
-
-📌 **Resultado esperado:**
-
-- Status da conexão: `OK`
-- Lista de usuários formatada com dias de criação calculados
-
-Exemplo:
-
-```
-Usuário Alice Silva está Ativo. Conta criada há 123 dias.
-Usuário João Pereira está Inativo. Conta criada há 400 dias.
-```
-
-### 2. Verificar logs (opcional)
-
-Para ver se o MS A recebeu requisições:
-
-```bash
-docker logs users
-```
+2.  Dê permissão e execute o script de inicialização:
+    ```bash
+    chmod +x run_desafio4.sh
+    ./run_desafio4.sh
+    ```
 
 ---
 
-## 🧹 Limpeza
+### Opção B: Windows / PowerShell (Comandos Manuais)
 
-Para encerrar e remover tudo:
+Para usuários de Windows, siga os comandos manualmente no terminal:
+
+1.  **Limpeza e Criação da Rede:**
+    Remova containers e rede antigos e crie a rede customizada:
+    ```bash
+    # Limpa containers e rede
+    docker rm -f users consumer
+    docker network rm rede_microservicos4
+    # Cria a rede customizada
+    docker network create rede_microservicos4
+    ```
+
+2.  **Construção das Imagens:**
+    ```bash
+    docker build -t users-service-img ./microservice_A
+    docker build -t consumer-service-img ./microservice_B
+    ```
+
+3.  **Execução dos Containers:**
+    Inicie o MS A (`users`) e, em seguida, o MS B (`consumer`), conectados à rede:
+    ```bash
+    # Inicia Microserviço A (Users)
+    docker run -d --name users --network rede_microservicos4 -p 5000:5000 users-service-img
+    # Inicia Microserviço B (Consumer)
+    docker run -d --name consumer --network rede_microservicos4 -p 8001:5001 consumer-service-img
+    ```
+
+---
+
+#### 3. Demonstração e Comprovação
+
+Acesse o **Microserviço B (Consumer)**, que acionará automaticamente a comunicação com o MS A:
+
+1.  **Acessar o Microserviço B:**
+    ```bash
+    curl http://localhost:8001
+    # ou acesse http://localhost:8001 no navegador
+    ```
+    **Comprovação:** A saída deve exibir a lista de usuários formatada e processada pelo MS B, confirmando a comunicação bem-sucedida.
+
+2.  **Verificar Logs do MS A:**
+    Confirme que o MS A recebeu a requisição do MS B:
+    ```bash
+    docker logs users
+    ```
+
+#### 4. Limpeza
+
+Para interromper e remover todos os recursos criados:
 
 ```bash
 docker rm -f users consumer
 docker network rm rede_microservicos4
-```
-
----

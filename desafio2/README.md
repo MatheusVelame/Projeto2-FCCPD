@@ -28,61 +28,93 @@ desafio2/
 
 ---
 
-## ⚙️ Instruções de Execução Passo a Passo
+### ⚙️ Instruções de Execução Passo a Passo
 
-O script `run_test.sh` executa o teste completo em duas fases, demonstrando a persistência dos dados.
-
-### 1. Pré-requisitos
-
-- Docker Engine instalado e em execução.
-
-### 2. Execução
-
-1. Acesse o diretório:
-   ```bash
-   cd desafio2
-   ```
-
-2. Dê permissão e execute:
-   ```bash
-   chmod +x run_test.sh
-   ./run_test.sh
-   ```
+#### Pré-requisitos
+Certifique-se de que o **Docker Engine** está instalado e em execução.
 
 ---
 
-## 🧪 Demonstração e Comprovação (Logs/Resultados)
+### Opção A: Linux / macOS (Usando Script Bash)
 
-O script executa duas fases:
+O script `run_test.sh` automatiza todo o teste em duas fases (criação/remoção e recriação/comprovação).
 
-| Fase | Ações | Comprovação |
-|------|--------|--------------|
-| **FASE 1: Criação e Remoção** | 1. Cria volume. 2. Inicia **Container A** (`db_persistente`). 3. Verifica dado criado pelo `init.sql`. 4. Para e remove container. | Confirma que o dado foi criado e salvo no volume. |
-| **FASE 2: Persistência Comprovada** | 5. Inicia **Container B** (`db_leitor`) usando o mesmo volume. 6. Verifica o dado. | O mesmo registro aparece no novo container → PROVA de persistência. |
+1.  Navegue até o diretório do desafio:
+    ```bash
+    cd desafio2
+    ```
 
----
-
-## 📌 Saída Esperada na Fase 2
-
-O container B deve mostrar o registro original:
-
-```
- id | mensagem                              | data_criacao
-----+----------------------------------------+------------------------------
-  1 | Dado original persistido com sucesso. | 2025-11-25 04:00:00.000000+00
-(1 row)
-```
+2.  Dê permissão e execute o script de teste:
+    ```bash
+    chmod +x run_test.sh
+    ./run_test.sh
+    ```
+    O script exibirá automaticamente a comprovação final.
 
 ---
 
-## 🧹 Limpeza
+### Opção B: Windows / PowerShell (Teste Manual)
 
-Os containers são criados com `--rm`, então são removidos automaticamente.
+O teste de persistência deve ser realizado manualmente em duas fases:
 
-Para remover o volume e resetar tudo:
+#### FASE 1: Inicialização e Inserção do Dado
+
+1.  **Crie o volume nomeado:**
+    ```bash
+    docker volume create dados_postgres_desafio2
+    ```
+
+2.  **Inicie o Container A (`db_persistente`):**
+    Este container usa o volume e insere o dado via `init.sql`:
+    ```bash
+    docker run --rm -d `
+        --name db_persistente `
+        -e POSTGRES_USER=admin `
+        -e POSTGRES_PASSWORD=secret `
+        -e POSTGRES_DB=mydb `
+        -v dados_postgres_desafio2:/var/lib/postgresql/data `
+        -v ${PWD}/init.sql:/docker-entrypoint-initdb.d/init.sql `
+        postgres:16-alpine
+    # Note: O uso de ` e ${PWD} é específico do PowerShell. Use `%CD%` no CMD.
+    ```
+    *Aguarde 5 segundos para o banco iniciar.*
+
+3.  **Verifique o dado inserido no Container A:**
+    ```bash
+    docker exec db_persistente psql -U admin -d mydb -c "SELECT * FROM registros_teste;"
+    ```
+
+4.  **Remova o Container A (Mantendo o Volume):**
+    ```bash
+    docker stop db_persistente
+    ```
+
+#### FASE 2: Recriação do Container e Comprovação
+
+5.  **Inicie o Container B (`db_leitor`) usando o MESMO VOLUME:**
+    Este container NÃO executa o `init.sql` porque o volume já tem dados:
+    ```bash
+    docker run --rm -d `
+        --name db_leitor `
+        -e POSTGRES_USER=admin `
+        -e POSTGRES_PASSWORD=secret `
+        -v dados_postgres_desafio2:/var/lib/postgresql/data `
+        postgres:16-alpine
+    ```
+    *Aguarde 5 segundos para o novo banco iniciar.*
+
+6.  **Verifique se o dado PERSISTIU no Container B:**
+    ```bash
+    docker exec db_leitor psql -U admin -d mydb -c "SELECT * FROM registros_teste;"
+    ```
+    **Comprovação:** A saída deve mostrar o dado inserido na Fase 1, provando que ele residiu no volume nomeado e persistiu após a remoção do container original.
+
+---
+
+#### Limpeza
+
+Para remover o volume de persistência e resetar o ambiente:
 
 ```bash
+# O stop/rm dos containers já é feito nos passos de teste
 docker volume rm dados_postgres_desafio2
-```
-
----
