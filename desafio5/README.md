@@ -92,7 +92,12 @@ desafio5/
    cd desafio5
    ```
 
-2. Suba toda a arquitetura:
+2. Limpeza Total:
+   ```bash
+   docker-compose down -v
+   ```
+
+3. Suba toda a arquitetura:
    ```bash
    docker-compose up --build -d
    ```

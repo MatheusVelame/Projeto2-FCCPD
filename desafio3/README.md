@@ -61,7 +61,12 @@ desafio3/
    cd desafio3
    ```
 
-2. Suba os serviços em modo *detached*:
+2. Limpeza Total:
+   ```bash
+   docker-compose down -v
+   ```
+
+3. Suba os serviços em modo *detached*:
    ```bash
    docker-compose up --build -d
    ```
